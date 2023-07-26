@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+    <!--link href="https://framework-gb.cdn.gob.mx/assets/styles/main.css" rel="stylesheet"-->
+    
+    <link rel="stylesheet" href="https://framework-gb.cdn.gob.mx/qa/assets/styles/main.css"/>
+    <!--link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous"-->
+    <link href="/static/jquery-ui-1.13.2.custom/jquery-ui.min.css"/>
+
+    {% block cssbars %}{% endblock %}
+    {% block espec_css %}{% endblock %}
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>{% block title %}{% endblock %}</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body style="padding-top:80px;">
+        <script>
+            // manejo de la sesión
+
+            var sesion_iniciada = false; // 
+
+            if (sessionStorage.getItem("usuario_logeado")) {
+                //to set the selected value:
+                document.getElementById("select_planta").value = sessionStorage.getItem("planta_actual");
+                id_planta_actual=sessionStorage.getItem("planta_actual");
+            }            
+
+        </script>        
+        <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+        <main>
+            {% block navbar %}{% endblock %}
+            <!--div class="wrapper"-->
+            {% block sidebar %}{% endblock %}
+            <div id="content">            
+                <header>
+                    <br>
+                    {% block header %}{% endblock %}
+
+                </header>
+                <div class="container">
+                    {% block body %}{% endblock %}
+                </div>
+            </div>
+            <!--/div-->
+        </main>
+
+        <!--script src="https://framework-gb.cdn.gob.mx/gobmx.js"></script-->
+        
+        <script src="/static/js/jquery-3.6.1.min.js"></script>
+        <!--script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script-->
+        <script src="https://framework-gb.cdn.gob.mx/qa/gobmx.js"></script>
+        <script src="/static/jquery-ui-1.13.2.custom/jquery-ui.min.js"></script>
+
+        {% block scriptbars %}{% endblock %}
+        {% block espec_js %}{% endblock %}
+    </body>
+</html>

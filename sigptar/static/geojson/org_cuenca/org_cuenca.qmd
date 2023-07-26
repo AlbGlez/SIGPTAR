@@ -1,0 +1,56 @@
+<!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
+<qgis version="3.22.8-Bia?owie?a">
+  <identifier>Region_hidrologico_administrativa_2010</identifier>
+  <parentidentifier></parentidentifier>
+  <language>SPA</language>
+  <type>dataset</type>
+  <title>Region_hidrologico_administrativa_2010</title>
+  <abstract>Área territorial definida de acuerdo con criterios hidrológicos, integrada por una o varias regiones hidrológicas, en la cual se considera a la cuenca hidrológica como la unidad básica para la gestión de los recursos hídricos y el municipio representa, como en otros instrumentos jurídicos, la unidad mínima de gestión administrativa en el país. (L.A.N)
+
+Presentar las 13 Regiones Hidrológico Administrativas en las que la Comisión Nacional del Agua divide al país, con el propósito de una mejor organización y preservación de las aguas nacionales.</abstract>
+  <keywords vocabulary="gmd:topicCategory">
+    <keyword>Municipios</keyword>
+  </keywords>
+  <contact>
+    <contactAddress>
+      <type>physical address</type>
+      <address>Insurgentes Sur No. 2416. 3er y 4to. Piso. Col. Copilco el Bajo, Delegación Coyoacán.</address>
+      <city>Ciudad de México</city>
+      <administrativearea>Ciudad de México</administrativearea>
+      <postalcode>04340</postalcode>
+      <country>México</country>
+    </contactAddress>
+    <name>Comisión Nacional del Agua. CONAGUA. Subdirección General de Programación. Coordinación de Proyectos Transversales Transparencia e Innovación.</name>
+    <organization>Comisión Nacional del Agua. CONAGUA. Subdirección General de Programación. Coordinación de Proyectos Transversales Transparencia e Innovación.</organization>
+    <position></position>
+    <voice>55 5174 4000</voice>
+    <fax></fax>
+    <email></email>
+    <role>Punto de contacto</role>
+  </contact>
+  <links/>
+  <fees></fees>
+  <encoding></encoding>
+  <crs>
+    <spatialrefsys>
+      <wkt></wkt>
+      <proj4></proj4>
+      <srsid>0</srsid>
+      <srid>0</srid>
+      <authid></authid>
+      <description></description>
+      <projectionacronym></projectionacronym>
+      <ellipsoidacronym></ellipsoidacronym>
+      <geographicflag>false</geographicflag>
+    </spatialrefsys>
+  </crs>
+  <extent>
+    <spatial maxx="0" minx="0" maxz="0" minz="0" dimensions="2" crs="" miny="0" maxy="0"/>
+    <temporal>
+      <period>
+        <start></start>
+        <end></end>
+      </period>
+    </temporal>
+  </extent>
+</qgis>

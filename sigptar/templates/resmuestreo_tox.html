@@ -1,0 +1,131 @@
+{% extends './base_nav.html' %}
+
+{% block title %}
+SIGPTAR
+{% endblock %}
+{% block espec_css %}
+
+<!--link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap.min.css" /-->
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs/dt-1.13.1/datatables.min.css" />
+
+<style type="text/css">
+    div.dataTables_info {
+        position: absolute
+    }
+
+    div.dataTables_wrapper div.dataTables_paginate {
+        float: right;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        text-align: right;
+        white-space: nowrap;
+    }
+</style>
+
+
+{%endblock%}
+{% block header %}
+<h3 style="text-align: center;" >Resultados del muestreo de la PTAR (toxicidad aguda)</h3>
+{% endblock %}
+
+{%block espec_js%}
+
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.13.1/datatables.min.js"></script>
+
+<!--
+<script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/buttons/1.5.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/select/1.2.5/js/dataTables.select.min.js"></script>
+<script type="text/javascript" charset="utf8"
+    src="https://editor.datatables.net/extensions/Editor/js/dataTables.editor.min.js"></script>
+-->
+
+<script>
+
+    // asigna el evento de cambio de planta
+    function select_planta_change(e) {
+        id_planta_actual = document.getElementById("select_planta").value;
+        sessionStorage.setItem('planta_actual', id_planta_actual);
+        consulta_resmuestreo_tox(id_planta_actual);
+    }
+
+    $('#select_planta').on('change', select_planta_change);
+
+    function consulta_resmuestreo_tox(idPlanta) {
+        if ($.fn.dataTable.isDataTable('#tabla_resmuestreo_tox')) {
+            table = $('#tabla_resmuestreo_tox').DataTable();
+            table.destroy();
+        }
+        table = $('#tabla_resmuestreo_tox').DataTable({
+            //"pagingType": "full_numbers",
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.13.1/i18n/es-MX.json",
+                'paginate': {
+                    'Primero': '<span class="prev-icon"></span>',
+                    'Anterior': '<span class="next-icon"></span>'
+                }
+            },
+            "dom": 'lfrtp', //
+            "processing": true,
+            "ajax": { "url": "/consulta_resmuestreo_tox?planta=" + idPlanta, "dataSrc": "" },
+            // add column definitions to map your json to the table                                           
+            "columns": [
+                { data: "tipo"},
+                { data: "muestra"},
+                { data: "ce50_5"},
+                { data: "ce50_15"},
+                { data: "ce50_30"},
+                { data: "ut_5"},
+                { data: "ut_15"},
+                { data: "ut_30"}
+            ],
+            columnDefs: [{ targets: 8, data: null, defaultContent: '<button>Modificar</button>' },
+            { targets: [0, 1, 2, 3, 4, 5, 6, 7], className: 'text-center' },
+            { targets: [0, 1, 2, 3, 4, 5, 6, 7], className: 'dt-head-center' }]
+        });
+
+        $('#tabla_resmuestreo_tox tbody').on('click', 'button', function () {
+            var data = table.row($(this).parents('tr')).data();
+            alert("Modificar  " + data.id_resmuestra_tox);
+        });
+
+    }
+
+    function triggerChange(element) {
+        let changeEvent = new Event('change');
+        element.dispatchEvent(changeEvent);
+    }
+
+    $(document).ready(function () {
+        triggerChange(document.getElementById("select_planta"));
+    });
+</script>
+
+{% endblock %}
+
+
+{% block body %}
+
+{% include 'select_planta.html' %}
+
+<table id="tabla_resmuestreo_tox" class="table table-fit table-striped table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>Tipo</th>
+            <th>Muestra</th>
+            <th>CE50 (%) 5 min</th>
+            <th>CE50 (%) 15 min</th>
+            <th>CE50 (%) 30 min</th>
+            <th>UT 5 min</th>
+            <th>UT 15 min</th>
+            <th>UT 30 min</th>
+            <th>Modificar</th>
+        </tr>
+    </thead>
+</table>
+
+{% endblock %}

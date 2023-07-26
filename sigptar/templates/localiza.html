@@ -1,0 +1,425 @@
+{% extends './base_nav.html' %}
+
+{% block title %}
+SIGPTAR
+{% endblock %}
+
+{% block espec_css %}
+<!--link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/-->
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css" />
+<link rel="stylesheet" href="/static/css/gh-pages.css" />
+
+<style type="text/css">
+    #mapX {
+        height: 400px;
+        width: 800px;
+    }
+</style>
+{% endblock %}
+
+{% block header %}
+<h3 style="text-align: center;" >Localización e información general</h3>
+{% endblock %}
+
+{% block body %}
+
+{% include 'select_planta.html' %}
+
+
+<table>
+    <tr>
+            <td align="right" style="padding-bottom: 10px">
+                Vista
+                <select name="vistas" id="vista_mapa">
+                    <option value="s">Satélite</option>
+                    <option value="m">Calle</option>
+                    <option value="s,h">Híbrida</option>
+                    <option value="p">Terreno</option>
+                </select>
+            </td>
+    </tr>
+    <tr>
+            <td>
+                <div id="map" style="height: 600px; width: 1092px; "></div>
+            </td>
+    </tr>
+    <tr>
+        <td>
+            <p></p>
+            <ul id="tabs-info-plantas" class="nav nav-tabs">
+                <!--li class="active"><a data-toggle="tab-info-planta" href="#tab-mapa">Localización</a></li-->
+                <li class="active"><a data-toggle="tab-info-planta" href="#tab-ident">Identificación</a></li>
+                <li><a data-toggle="tab-info-planta" href="#tab-dimensiones">Dimensiones</a></li>
+                <li><a data-toggle="tab-info-planta" href="#tab-datos">Datos generales</a></li>
+                <li><a data-toggle="tab-info-planta" href="#tab-resp">Responsable</a></li>
+            </ul>
+            <div class="tab-content">
+                <!--div class="tab-pane " id="tab-mapa"></div-->
+                <div class="tab-pane active" id="tab-ident"></div>
+                <div class="tab-pane" id="tab-dimensiones"></div>
+                <div class="tab-pane" id="tab-datos"></div>
+                <div class="tab-pane" id="tab-resp"></div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+{% endblock %}
+{%block espec_js%}
+<!--script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script-->
+<script src="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.js"></script>
+<script src="/static/js/catiline.js"></script>
+<script src="/static/js/leaflet.shpfile.js"></script>
+
+<script type="text/javascript">
+
+
+    var map = L.map('map').setView([19.42847, -99.12766], 8);
+
+    function setTileLayer(idLayer) {
+        L.tileLayer('http://{s}.google.com/vt/lyrs='+idLayer+'&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
+        }).addTo(map);
+    }
+
+    setTileLayer('s'); // por default
+
+    $('#vista_mapa').change(function(){
+        idLayer=$(this).val();
+        setTileLayer(idLayer); 
+    })    
+
+    var gjsEstados = "/static/geojson/div_politica/desta4mgw.geojson";
+
+    function forEachFeature(feature, layer) {
+        var popupContent = "<b> Estado: </b>" + feature.properties.ESTADO + "</br>" +
+            "<b>Clave: </b>" + feature.properties.CVE_EDO + "</br>" +
+            "<b>Area: </b>" + feature.properties.AREA + "</br>" +
+            "<b>Perímetro: </b>" + feature.properties.PERIMETER + "</br>";
+
+        layer.bindPopup(popupContent);
+    };
+
+    function stylePolygonEstado(feature) {
+        return {
+            weight: 3, // grosor de línea
+            color: 'red', // color de línea
+            opacity: 1.0, // tansparencia de línea
+            fillColor: 'red', // color de relleno
+            fillOpacity: 0 // transparencia de relleno
+        };
+    }
+
+    // Get GeoJSON data and create features.
+    $.getJSON(gjsEstados, function (data) {
+
+        estados = L.geoJson(data, {
+
+            onEachFeature: forEachFeature,
+
+            /*function(feature, layer) {
+                if (feature.properties) {
+                    layer.bindPopup(Object.keys(feature.properties).map(function(k) {
+                        return k + ": " + feature.properties[k];
+                    }).join("<br />"), {
+                        maxHeight: 200
+                    });
+                }
+            },*/
+            style: stylePolygonEstado //{ "fillOpacity": 0 }
+            /*pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, {
+                    radius: 6,
+                    opacity: .5,
+                    color: "#000",
+                    fillColor: 'red',
+                    fillOpacity: 0.8
+                });
+            }*/
+        });
+        //map.fitBounds(sites.getBounds(), { padding: [12, 12] });
+        estados.addTo(map);
+    });
+
+
+    var gjsOrgCuenca = "/static/geojson/org_cuenca/org_cuenca.geojson";
+
+    function forEachFeatureOC(feature, layer) {
+        var popupContent = "<b> Clave: </b>" + feature.properties.cve_rha + "</br>" +
+            "<b>Nombre: </b>" + feature.properties.NOM_RHA + "</br>" +
+            "<b>Área (Km2): </b>" + feature.properties.AREA + "</br>";
+
+        layer.bindPopup(popupContent);
+    }
+
+
+    function stylePolygonOC(feature) {
+        return {
+            weight: 1.3, // grosor de línea
+            color: 'green', // color de línea
+            opacity: 1.0, // tansparencia de línea
+            fillColor: 'red', // color de relleno
+            fillOpacity: 0 // transparencia de relleno
+        };
+    }
+
+
+    // Get GeoJSON data and create features.
+    $.getJSON(gjsOrgCuenca, function (data) {
+
+        orgcuenca = L.geoJson(data, {
+            style: stylePolygonOC,
+            onEachFeature: forEachFeatureOC
+        });
+        //map.fitBounds(sites.getBounds(), { padding: [12, 12] });
+        orgcuenca.addTo(map);
+    });
+
+    var gjsAreaInfluencia = "/static/geojson/area_influencia_ptars/area_influencia.geojson";
+    function forEachFeatureAreaInfluencia(feature, layer) {
+        var popupContent = "<b>Estado: </b>" + feature.properties.NOM_ENT + "</br>" +
+            "<b>Municipio: </b>" + feature.properties.NOM_MUN + "</br>";
+
+        layer.bindPopup(popupContent);
+    };
+
+    function stylePolygonAI(feature) {
+        return {
+            weight: 2, // grosor de línea
+            color: 'yellow', // color de línea
+            opacity: 1.0, // tansparencia de línea
+            fillColor: 'red', // color de relleno
+            fillOpacity: 0 // transparencia de relleno
+        };
+    }
+    // Get GeoJSON data and create features.
+    $.getJSON(gjsAreaInfluencia, function (data) {
+
+        areasInfluencia = L.geoJson(data, {
+
+            onEachFeature: forEachFeatureAreaInfluencia,
+            style: stylePolygonAI //{ "fillOpacity": 0 }
+        });
+        //map.fitBounds(sites.getBounds(), { padding: [12, 12] });
+        areasInfluencia.addTo(map);
+    });
+
+    //var shpfile = new L.Shapefile('/static/shape/Estados.zip',{}).addTo(map);
+
+    /*var shpfile = new L.Shapefile('/static/shape/desta4mgw.zip', {
+            onEachFeature: function(feature, layer) {
+                if (feature.properties) {
+                    layer.bindPopup(Object.keys(feature.properties).map(function(k) {
+                        return k + ": " + feature.properties[k];
+                    }).join("<br />"), {
+                        maxHeight: 200
+                    });
+                }
+            }
+        });*/
+    /*shpfile.bindPopup("Hello World");
+    shpfile.on("add", function (event) {
+        event.target.openPopup();
+    });
+
+    console.log("Tratando de añadir shapefile: " + shpfile);
+    shpfile.once("data:loaded", function () {
+        console.log("Se terminó la carga del shape de Estados.");
+    });*/
+
+    //shpfile.addTo(map);
+
+    /* Open Street Map
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    */
+
+    /*
+    var popup = L.popup()
+        .setLatLng([43.26271, -2.92528])
+        .setContent('<a href="https://www.youtube.com/watch?v=YcAW-VbTYnY" target="_blank">La capital del mundo</a>');
+
+    var marker = L.marker([43.26271, -2.92528]).bindPopup(popup).openPopup().addTo(map);
+}   */
+
+</script>
+
+<script type="text/javascript">
+
+    const plantas = {{ lista_plantas| tojson | safe }}
+    const etiquetas = {{ etiquetas_plantas| tojson | safe }}
+
+
+    var seccion_seleccionada = "Identificación"; // seccion asociada al tab
+    var tab_seleccionado = "tab-ident"; // el ultimo tab seleccionado
+    var info_planta_seleccionada = ""; // informacion de la planta seleccionada
+
+    var coord_planta = {
+        lat: 0.0,
+        long: 0.0
+    };
+
+    console.log(plantas);
+    console.log(etiquetas)
+    //alert(etiquetas[0]);
+
+    function tableFromJson(data, headings, table_container) {
+        // Create a table.
+        const table = document.createElement("table");
+        table.className = "table table-fit table-striped table-bordered table-sm";
+        //table.width="600px";
+        // Create table header row using the extracted headers above.
+        let tr = table.insertRow(-1);   // table row.
+
+        for (let i = 0; i < headings.length; i++) {
+            let th = document.createElement("th");      // table header.
+            th.className = "thead-dark"
+            th.innerHTML = headings[i];
+            tr.appendChild(th);
+        }
+
+        // add json data to the table as rows.
+        for (let i = 0; i < data.length; i++) {
+            tr = table.insertRow(-1);
+            for (let j = 0; j < headings.length; j++) {
+                let tabCell = tr.insertCell(-1);
+                if (j>0)
+                    tabCell.style="max-width: 400px; word-wrap: break-word;";
+                else
+                    tabCell.style="width: 100px; word-wrap: break-word;";
+
+                if (data[i][j] == null)
+                    tabCell.innerHTML = "";
+                else
+                    tabCell.innerHTML = data[i][j];
+            }
+        }
+
+        // Now, add the newly created table with json data, to a container.
+        const divShowData = document.getElementById(table_container);
+        divShowData.innerHTML = "";
+        divShowData.appendChild(table);
+        console.log("Tabla cargada!!");
+    }
+
+    // asigna el evento de cambio de tab
+
+    $('a[data-toggle="tab-info-planta"]').on('shown.bs.tab', function (e) {
+        var target = $(e.target).attr("href") // activated tab
+        seccion_seleccionada = e.target.textContent;
+        tab_seleccionado = target.substring(1);
+        console.log("SECCIÓN: " + seccion_seleccionada + ", tab: " + tab_seleccionado);
+        //if (tab_seleccionado != "tab-mapa")
+            llenaTablaPlanta(id_planta_actual, seccion_seleccionada, tab_seleccionado);
+        //alert(target);
+    });
+
+    function setActiveTab(tab) {
+        $('.nav-tabs li').removeClass('active');
+        $('.tab-content .tab-pane').removeClass('active');
+
+        $('a[href="#' + tab + '"]').closest('li').addClass('active');
+        $('#' + tab).addClass('active');
+    }
+
+    function muestra_planta_en_mapa(lat, long, info) {
+        console.log("Coord:" + lat + "," + long)
+        if (lat != 0 && long != 0) {
+            curzoom=map.getZoom()
+            //alert(curzoom);
+            if (curzoom<10)
+                curzoom=12;
+            map.setView(new L.LatLng(lat, long), curzoom, { animation: true });
+            var popup = L.popup().setLatLng([lat, long])
+                .setContent(info);
+            var marker = L.marker([lat, long], {
+                icon: L.divIcon({
+                    className: 'leaflet-div-icon',
+                    html: "<b style='color:cyan;font-size:200%'> " + $("#select_planta option:selected").text() + "</b>",
+                    iconSize: [10, 10]
+                })
+            }).bindPopup(popup).openPopup().addTo(map);
+        }
+    }
+
+    // asigna el eveto de cambio de planta
+    function select_planta_change(e) {
+        id_planta_actual = document.getElementById("select_planta").value;
+        sessionStorage.setItem('planta_actual', id_planta_actual);
+        //if (tab_seleccionado != "tab-mapa")
+            llenaTablaPlanta(id_planta_actual, seccion_seleccionada, tab_seleccionado);
+        muestra_planta_en_mapa(coord_planta.lat, coord_planta.long, info_planta_seleccionada);
+    }
+
+    $('#select_planta').on('change', select_planta_change);
+
+    function getPlanta(planta_id) {
+        console.log('Planta: ' + planta_id);
+        for (var i = 0; i < plantas.length; i++) {
+            if (parseInt(plantas[i][0]) == parseInt(planta_id)) {
+                return plantas[i];
+            }
+        }
+        return null;
+    }
+
+
+    function llenaTablaPlanta(planta_id, seccion_req, contenedor) {
+        planta = getPlanta(planta_id);
+        //console.log("Param LTP: "+planta_id+", "+seccion_req+", "+contenedor);
+        //console.log("Info Planta: "+planta)
+        var titulos = ["Indice", "Dato", "Valor"];
+        var data = [];
+        // se asume que el orden de etiquetas y el de los atributos de la planta es el mismo
+        indice = 1;
+        info_planta_seleccionada = "<table>";
+        for (var e = 0; e < etiquetas.length; e++) {
+            var reg = []
+            if (etiquetas[e][2] === seccion_req) {
+                reg.push(indice);
+                reg.push(etiquetas[e][1]);
+                reg.push(planta[e]);
+                console.log(reg);
+                data.push(reg);
+                indice++;
+            }
+            // verifica si encuentra las coordenadas
+            if (etiquetas[e][0] === "coord_latitud" && planta[e] !== "")
+                coord_planta.lat = parseFloat(planta[e]);
+            if (etiquetas[e][0] === "coord_longitud" && planta[e] !== "")
+                coord_planta.long = parseFloat(planta[e]);
+
+            var arrCampos = ['id_planta', 'nombre_ptar', 'estado', 'municipio'];
+            if (arrCampos.indexOf(etiquetas[e][0]) >= 0) {
+                info_planta_seleccionada += "<tr><td>" + etiquetas[e][1] + "</td><td>" + planta[e] + "</td></tr>";
+            }
+
+        }
+        info_planta_seleccionada += "</table>";
+        console.log(info_planta_seleccionada);
+        tableFromJson(data, titulos, contenedor);
+    }
+
+    function triggerChange(element) {
+        let changeEvent = new Event('change');
+        element.dispatchEvent(changeEvent);
+    }
+
+    $(document).ready(function () {
+        $('#tabs-info-plantas a').click(function (e) {
+            e.preventDefault()
+            $(this).tab('show')
+        })
+
+        $('a[data-toggle="tab-ident"]').on('shown.bs.tab', function (e) {
+            e.relatedTarget // previous tab
+        });
+
+        triggerChange(document.getElementById("select_planta"));
+    });
+
+
+</script>
+{%endblock%}

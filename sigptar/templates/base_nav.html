@@ -1,0 +1,28 @@
+{% extends './base.html' %}
+
+{% block cssbars %}
+{#<link rel="stylesheet" href="./static/css/sidebar.css">#}
+{% endblock %}
+
+
+{% block navbar %}
+
+{% include './navbar.html' %}
+
+{% endblock %}
+
+{% block sidebar %}
+{# {% include './sidebar.html' %} #}
+{% endblock %}
+
+{% block scriptbars %}
+<!--script src="/static/js/sidebar.js"></script-->
+<script>
+$(document).ready(function() {
+    $("#sidebarCollapse").on("click", function() {
+      $("#sidebar").toggleClass("active");
+      $(this).toggleClass("active");
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+    .table {
+        margin: 0 auto;
+        width: auto ; 
+     }
+
+     .center-block {
+        display: table;  /* Instead of display:block */
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .fontpassword {
+        position: relative;
+    }
+      
+    .fontpassword i{
+        position: absolute;
+        left: 15px;
+        top: 40px;
+        color: gray;
+    }
+
+    .alnright { text-align: right; }
+
+    input.larger {
+        width: 15px;
+        height: 15px;
+      }
+
+    input.valign {
+        vertical-align: center;
+
+    }
+
+

@@ -1,0 +1,425 @@
+{% extends './base_nav.html' %}
+
+{% block title %}
+SIGPTAR
+{% endblock %}
+{% block espec_css %}
+
+<!--link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap.min.css" /-->
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs/dt-1.13.1/datatables.min.css"/>
+ 
+<style type="text/css">
+    div.dataTables_info {
+        position: absolute
+    }
+
+    div.dataTables_wrapper div.dataTables_paginate {
+        float: right;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        text-align: right;
+        white-space: nowrap;
+    }
+</style>
+
+{%endblock%}
+{% block header %}
+<h3 style="text-align: center;" >Resultados del muestreo de la PTAR (caudales)</h3>
+{% endblock %}
+
+{%block espec_js%}
+
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.13.1/datatables.min.js"></script>
+
+<!--
+<script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/buttons/1.5.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/select/1.2.5/js/dataTables.select.min.js"></script>
+<script type="text/javascript" charset="utf8"
+    src="https://editor.datatables.net/extensions/Editor/js/dataTables.editor.min.js"></script>
+-->
+
+<!-- Chart JS -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.js"
+    integrity="sha256-JG6hsuMjFnQ2spWq0UiaDRJBaarzhFbUxiUTxQDA9Lk=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"
+    integrity="sha256-XF29CBwU1MWLaGEnsELogU6Y6rcc5nCkhhx89nFMIDQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.js"
+    integrity="sha256-J2sc79NPV/osLcIpzL3K8uJyAD7T5gaEFKlLDM18oxY=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"
+    integrity="sha256-CfcERD4Ov4+lKbWbYqXD6aFM9M51gN4GUEtDhkWABMo=" crossorigin="anonymous"></script>
+
+<script>
+
+    // asigna el evento de cambio de planta
+    function select_planta_change(e) {
+        id_planta_actual = document.getElementById("select_planta").value;
+        sessionStorage.setItem('planta_actual', id_planta_actual);
+        consulta_resmuestreo_caudales(id_planta_actual);
+    }
+
+    $('#select_planta').on('change', select_planta_change);
+
+    function consulta_resmuestreo_caudales(idPlanta) {
+        if ($.fn.dataTable.isDataTable('#tabla_resmuestreo_caudales')) {
+            table = $('#tabla_resmuestreo_caudales').DataTable();
+            table.destroy();
+        }
+        table = $('#tabla_resmuestreo_caudales').DataTable({
+            //"pagingType": "full_numbers",
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.13.1/i18n/es-MX.json",
+                'paginate': {
+                    'Primero': '<span class="prev-icon"></span>',
+                    'Anterior': '<span class="next-icon"></span>'
+                }
+            },
+            "dom": 'lfrtp', //
+            "processing": true,
+            "ajax": { "url": "/consulta_resmuestreo_caudales?planta=" + idPlanta, "dataSrc": "" },
+            // add column definitions to map your json to the table                                           
+            "columns": [
+                { data: "tipo" },
+                { data: "muestra" },
+                { data: "caudal" },
+                { data: "ph" },
+                { data: "temp" },
+                { data: "materia_flotante" },
+                { data: "grasas_aceites" },
+                { data: "coli_fec" },
+                { data: "ecoli" }
+            ],
+            columnDefs: [{ targets: 9, data: null, defaultContent: '<button>Modificar</button>' },
+            { targets: [0, 1, 2, 3, 4, 5, 6, 7, 8], className: 'text-center' },
+            { targets: [0, 1, 2, 3, 4, 5, 6, 7, 8], className: 'dt-head-center' }]
+        });
+
+        $('#tabla_resmuestreo_caudales tbody').on('click', 'button', function () {
+            var data = table.row($(this).parents('tr')).data();
+            alert("Modificar  " + data.id_resmuestra_caudal);
+        });
+
+        $.ajax({
+            url: "/consulta_datosgraf_resmuestreo_caudales?planta=" + idPlanta,
+            dataType: 'json',
+            contentType: "application/json; charset=utf-8",
+            method: "GET",
+            success: function (data) {
+                var muestras = [];
+                var caudal_influente = [];
+                var caudal_efluente = [];
+
+                var temp_influente = [];
+                var temp_efluente = [];
+
+                var ph_influente = [];
+                var ph_efluente = [];
+
+                //var color = ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 159, 64, 0.2)'];
+                //var bordercolor = ['rgba(255,99,132,1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'];
+                console.log(data);
+
+                for (var i in data) {
+                    muestras.push(data[i].muestra);
+                    // carga los datos de los caudales
+                    caudal_influente.push(data[i].caudal_influente);
+                    caudal_efluente.push(data[i].caudal_efluente);
+                    // carga los datos de la temperatura
+                    temp_influente.push(data[i].temp_influente);
+                    temp_efluente.push(data[i].temp_efluente);
+                    // carga los datos de pH
+                    ph_influente.push(data[i].ph_influente);
+                    ph_efluente.push(data[i].ph_efluente);
+
+
+                }
+
+                // CAUDALES
+
+                var chartdataCaudales = {
+                    labels: muestras,
+                    datasets: [{
+                        label: 'Influente',
+                        backgroundColor: '#9BD0F5',
+                        borderColor: '#36A2EB',
+                        borderWidth: 2,
+                        hoverBackgroundColor: '#9BD0F5',
+                        hoverBorderColor: '#36A2EB',
+                        data: caudal_influente
+                    }, {
+                        label: 'Efluente',
+                        backgroundColor: '#9BD0A5',
+                        borderColor: '#36A2CB',
+                        borderWidth: 2,
+                        hoverBackgroundColor: '#9BD0A5',
+                        hoverBorderColor: '#36A2CB',
+                        data: caudal_efluente
+                    }
+                    ]
+                };
+
+                document.getElementById("contenedor_grafica1").innerHTML = '&nbsp;';
+                document.getElementById("contenedor_grafica1").innerHTML = '<canvas id="Grafica_Caudales1"></canvas>';
+
+                var mostrar = $("#Grafica_Caudales1");
+                //mostrar.destroy();
+
+                var grafico = new Chart(mostrar, {
+                    type: 'bar',
+                    data: chartdataCaudales,
+                    options: {
+
+                        title: {
+                            display: true,
+                            text: 'Resultados de muestreos de calidad del agua (caudales)',
+                            position: 'top',
+                            fontSize: 20
+                        }
+                        ,
+                        //responsive: true,
+                        scales: {
+                            xAxes: [{
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Muestras',
+                                    fontSize: 16
+                                }
+                            }],
+
+                            yAxes: [{
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'L/s',
+                                    fontSize: 16
+                                },
+                                ticks: {
+                                    fontSize: 16,
+                                    beginAtZero: true
+                                }
+                            }]
+                        }
+                    }
+                });
+
+                // PH
+
+                var chartdataPH = {
+                    labels: muestras,
+                    datasets: [{
+                        label: 'pH influente',
+                        fill: false,
+                        backgroundColor: 'lime',
+                        pointRadius: 5,
+                        borderColor: '#36A2EB',
+                        borderWidth: 4,
+                        hoverBackgroundColor: 'lime',
+                        hoverBorderColor: '#36A2EB',
+                        data: ph_influente
+                    }, {
+                        label: 'pH efluente',
+                        fill: false,
+                        backgroundColor: 'yellow',
+                        pointRadius: 5,
+                        borderColor: '#36A2CB',
+                        borderWidth: 4,
+                        hoverBackgroundColor: 'yellow',
+                        hoverBorderColor: '#36A2CB',
+                        data: ph_efluente
+                    }
+                    ]
+                };
+
+                document.getElementById("contenedor_grafica2").innerHTML = '&nbsp;';
+                document.getElementById("contenedor_grafica2").innerHTML = '<canvas id="Grafica_Caudales2"></canvas>';
+
+                var mostrar2 = $("#Grafica_Caudales2");
+                //mostrar.destroy();
+
+                var grafico = new Chart(mostrar2, {
+                    type: 'bar',
+                    data: chartdataPH,
+                    options: {
+
+                        title: {
+                            display: true,
+                            text: 'Resultados de muestreos de calidad del agua (pH)',
+                            position: 'top',
+                            fontSize: 20
+                        }
+                        ,
+                        //responsive: true,
+                        scales: {
+                            xAxes: [{
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Muestras',
+                                    fontSize: 16
+                                }
+                            }],
+
+                            yAxes: [{
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'pH',
+                                    fontSize: 16
+                                },
+                                ticks: {
+                                    fontSize: 16,
+                                    beginAtZero: true
+                                }
+                            }]
+                        }
+                    }
+                });
+
+                // TEMPERATURA
+
+                var chartdataTemp = {
+                    labels: muestras,
+                    datasets: [{
+                        label: 'Temperatura influente',
+                        fill: false,
+                        backgroundColor: 'red',
+                        pointRadius: 5,
+                        //borderColor: '#36A2EB',
+                        borderWidth: 4,
+                        hoverBackgroundColor: 'red',
+                        //hoverBorderColor: '#36A2EB',
+                        data: temp_influente
+                    }, {
+                        label: 'Temperatura efluente',
+                        fill: false,
+                        backgroundColor: 'blue',
+                        pointRadius: 5,
+                        //borderColor: '#36A2CB',
+                        borderWidth: 4,
+                        hoverBackgroundColor: 'blue',
+                        //hoverBorderColor: '#36A2CB',
+                        data: temp_efluente
+                    }
+                    ]
+                };
+
+                document.getElementById("contenedor_grafica3").innerHTML = '&nbsp;';
+                document.getElementById("contenedor_grafica3").innerHTML = '<canvas id="Grafica_Caudales3"></canvas>';
+
+                var mostrar3 = $("#Grafica_Caudales3");
+                //mostrar.destroy();
+
+                var grafico = new Chart(mostrar3, {
+                    type: 'line',
+                    data: chartdataTemp,
+                    options: {
+
+                        title: {
+                            display: true,
+                            text: 'Resultados de muestreos de calidad del agua (temperatura)',
+                            position: 'top',
+                            fontSize: 20
+                        }
+                        ,
+                        //responsive: true,
+                        scales: {
+                            xAxes: [{
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: 'Muestras',
+                                    fontSize: 16
+                                }
+                            }],
+
+                            yAxes: [{
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: '°C',
+                                    fontSize: 16
+                                },
+                                ticks: {
+                                    fontSize: 16,
+                                    beginAtZero: true
+                                }
+                            }]
+                        }
+                    }
+                });
+
+            },
+            error: function (data) {
+                console.log(data);
+            }
+
+        });
+
+    }
+
+    function triggerChange(element) {
+        let changeEvent = new Event('change');
+        element.dispatchEvent(changeEvent);
+    }
+
+    $(document).ready(function () {
+        triggerChange(document.getElementById("select_planta"));
+    });
+</script>
+
+{% endblock %}
+
+
+{% block body %}
+
+{% include 'select_planta.html' %}
+
+<table id="tabla_resmuestreo_caudales" class="table table-fit table-striped table-bordered table-sm" style="width:100%">
+    <thead>
+        <tr>
+            <th>Tipo</th>
+            <th>Muestra</th>
+            <th>Caudal (L/s)</th>
+            <th>pH</th>
+            <th>Temperatura (°C)</th>
+            <th>Materia flotante</th>
+            <th>G y A (mg/L)</th>
+            <th>CF (NMP/100 mL)</th>
+            <th>E. Coli (NMP/100 mL)</th>
+            <th>Modificar</th>
+        </tr>
+    </thead>
+</table>
+<br>
+<br>
+<table width="80%" style="margin-left:auto; margin-right:auto; text-align:center;">
+    <tr>
+        <td>
+            <div class="row">
+                <div id="contenedor_grafica1" class="col-md-12">
+                    <canvas id="Grafica_Caudales1"></canvas>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="row">
+                <div id="contenedor_grafica2" class="col-md-12">
+                    <canvas id="Grafica_Caudales2"></canvas>
+                </div>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <div class="row">
+                <div id="contenedor_grafica3" class="col-md-12">
+                    <canvas id="Grafica_Caudales3"></canvas>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+{% endblock %}
+

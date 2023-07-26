@@ -1,0 +1,30 @@
+
+<table>
+    <tr>
+        <td style="padding: 10px;"><b>Planta</b></td>
+        <td style="padding: 10px;">
+                <SELECT id="select_planta" style="font-family:verdana">
+                    <!-- Ojo, siempe se espera el id y el nombre de la planta en las primeras 2 columnas-->
+                    {% for j in lista_plantas %}
+                    <!-- <OPTION value={{j[0]}} {% if planta_actual == j[0] %} selected="selected" {% endif %} >{{j[1]}}</OPTION>
+        -->
+                    <OPTION value={{j[0]}}>{{j[1]}}</OPTION>
+                    {% endfor %}
+                </SELECT>
+        </td>
+        <td>
+            <input type="button" value="Filtrar"/>
+        </td>
+    </tr>
+</table>
+
+<script>
+
+    var id_planta_actual = -1; // el identificador de la planta seleccionada
+
+    if (sessionStorage.getItem("planta_actual")) {
+        //to set the selected value:
+        document.getElementById("select_planta").value = sessionStorage.getItem("planta_actual");
+        id_planta_actual=sessionStorage.getItem("planta_actual");
+    }
+</script>

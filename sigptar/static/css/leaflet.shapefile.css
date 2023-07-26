@@ -1,0 +1,11 @@
+.leaflet-draw-toolbar .leaflet-draw-shapefile-upload {
+    background-image: url('images/upload.png');
+}
+
+.leaflet-draw-toolbar .leaflet-draw-shapefile-download {
+    background-image: url('images/download.png');
+}
+
+.leaflet-draw-toolbar .leaflet-draw-shapefile-loading {
+    background-image: url('images/loading.gif');
+}

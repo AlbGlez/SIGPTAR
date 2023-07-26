@@ -1,0 +1,155 @@
+{% extends './base_nav.html' %}
+
+{% block title %}
+SIGPTAR
+{% endblock %}
+{% block espec_css %}
+
+<!--link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap.min.css" /-->
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs/dt-1.13.1/datatables.min.css" />
+
+<style type="text/css">
+    div.dataTables_info {
+        position: absolute
+    }
+
+    div.dataTables_wrapper div.dataTables_paginate {
+        float: right;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        text-align: right;
+        white-space: nowrap;
+    }
+</style>
+
+
+{%endblock%}
+{% block header %}
+<h3 style="text-align: center;" >Resultados del muestreo de la PTAR (compuesta)</h3>
+{% endblock %}
+
+{%block espec_js%}
+
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.13.1/datatables.min.js"></script>
+
+<!--
+<script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/buttons/1.5.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/select/1.2.5/js/dataTables.select.min.js"></script>
+<script type="text/javascript" charset="utf8"
+    src="https://editor.datatables.net/extensions/Editor/js/dataTables.editor.min.js"></script>
+-->
+
+<script>
+
+    // asigna el evento de cambio de planta
+    function select_planta_change(e) {
+        id_planta_actual = document.getElementById("select_planta").value;
+        sessionStorage.setItem('planta_actual', id_planta_actual);
+        consulta_resmuestreo_compuesta(id_planta_actual);
+    }
+
+    $('#select_planta').on('change', select_planta_change);
+
+    function consulta_resmuestreo_compuesta(idPlanta) {
+        if ($.fn.dataTable.isDataTable('#tabla_resmuestreo_compuesta')) {
+            table = $('#tabla_resmuestreo_compuesta').DataTable();
+            table.destroy();
+        }
+        table = $('#tabla_resmuestreo_compuesta').DataTable({
+            //"pagingType": "full_numbers",
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.13.1/i18n/es-MX.json",
+                'paginate': {
+                    'Primero': '<span class="prev-icon"></span>',
+                    'Anterior': '<span class="next-icon"></span>'
+                }
+            },
+            "dom": 'lfrtp', //
+            "processing": true,
+            "ajax": { "url": "/consulta_resmuestreo_compuesta?planta=" + idPlanta, "dataSrc": "" },
+            // add column definitions to map your json to the table                                           
+            "columns": [
+                { data: "tipo" },
+                { data: "solsed" },
+                { data: "sst" },
+                { data: "dbo5" },
+                { data: "nt" },
+                { data: "pt" },
+                { data: "hh" },
+                { data: "dqo" },
+                { data: "color_a436" },
+                { data: "color_a525" },
+                { data: "color_a620" },
+                { data: "color_alph" },
+                { data: "arsenico" },
+                { data: "cadmio" },
+                { data: "cobre" },
+                { data: "cromo" },
+                { data: "mercurio" },
+                { data: "niquel" },
+                { data: "plomo" },
+                { data: "zinc" }
+            ],
+            columnDefs: [{ targets: 20, data: null, defaultContent: '<button>Modificar</button>' },
+            { targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], className: 'text-center' },
+            { targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], className: 'dt-head-center' }]
+        });
+
+        $('#tabla_resmuestreo_compuesta tbody').on('click', 'button', function () {
+            var data = table.row($(this).parents('tr')).data();
+            alert("Modificar  " + data.id_resmuestra_compuesta);
+        });
+
+    }
+
+    function triggerChange(element) {
+        let changeEvent = new Event('change');
+        element.dispatchEvent(changeEvent);
+    }
+
+    $(document).ready(function () {
+        triggerChange(document.getElementById("select_planta"));
+    });
+</script>
+
+{% endblock %}
+
+
+{% block body %}
+
+{% include 'select_planta.html' %}
+
+<table id="tabla_resmuestreo_compuesta" class="table table-fit table-striped table-bordered table-sm">
+    <thead>
+        <tr>
+            <th>Tipo</th>
+            <th>Sol. Sed. (mL/L)</th>
+            <th>SST (mg/L)</th>
+            <th>DBO5 (mg/L)</th>
+            <th>NT (mg/L)</th>
+            <th>PT (mg/L)</th>
+            <th>HH (NMP/100 mL)</th>
+            <th>DQO (mg/L)</th>
+            <th>Color (A 436 nm)</th>
+            <th>Color (A 525 nm)</th>
+            <th>Color (A 620 nm)</th>
+            <th>Color (al pH)</th>
+            <th>Arsénico (mg/L)</th>
+            <th>Cadmio (mg/L)</th>
+            <th>Cobre (mg/L)</th>
+            <th>Cromo (mg/L)</th>
+            <th>Mercurio (mg/L)</th>
+            <th>Níquel (mg/L)</th>
+            <th>Plomo (mg/L)</th>
+            <th>Zinc (mg/L)</th>
+            <th>Modificar</th>
+        </tr>
+    </thead>
+</table>
+
+{% endblock %}

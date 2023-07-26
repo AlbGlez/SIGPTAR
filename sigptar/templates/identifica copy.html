@@ -1,0 +1,62 @@
+{% extends './base_nav.html' %}
+
+{% block title %}
+SIGPTAR
+{% endblock %}
+
+{% block espec_css %}
+<!--link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/-->
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.6.4/leaflet.css" />
+
+<link rel="stylesheet" 
+      href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" 
+      integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" 
+      crossorigin="anonymous">
+
+<style type="text/css">
+
+</style>
+{% endblock %}
+
+{% block header %}
+<!--h1 style="font-size:medium">Localización e información general</h1-->
+<h3 align='center'>Autenticación de usuario</h3>
+
+{% endblock %}
+
+{% block body %}
+
+<form>
+<div class="container">
+    <div class="form-group">
+        <label for="inputUsr">Usuario:</label>
+        <div class="input-group">
+            
+            <input type="text" maxlength="20" class="form-control" id="inputUsr" aria-describedby="emailHelp" placeholder="Escribe el nombre de usuario" style="width: 200px;">
+            <!--small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small-->
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="user_password">Contraseña:</label>
+        <div class="input-group">
+            <input type="password" name="user_password" id="user_password" class="form-control" data-toggle="password" style="width: 200px;">
+            <div class="input-group-append">
+                <span class="input-group-text"><i class="fa fa-eye"></i></span>
+            </div>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Acceder</button>
+</div>
+
+</form>
+{% endblock %}
+
+{%block espec_js%}
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" 
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" 
+        crossorigin="anonymous">
+</script>
+<script type="text/javascript" src="/static/js/bootstrap-show-password.js"></script>
+
+{% endblock %}

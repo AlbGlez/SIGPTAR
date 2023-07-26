@@ -1,0 +1,75 @@
+<nav class="navbar navbar-inverse sub-navbar navbar-fixed-top" style="height: 62px;">
+    <div class="container">
+      <div class="navbar-header">
+
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#subenlaces">
+          <span class="sr-only">Interruptor de Navegación</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+
+        <a class="navbar-brand" style="font-size:30px;font-weight: bold" href="/inicio">SIGPTAR</a>
+      </div>
+      <div class="collapse navbar-collapse" id="subenlaces">
+        <ul class="nav navbar-nav navbar-right">
+          <!--li><a href="#">Enlace</a></li-->
+
+          <!-- menú consulta -->
+          {% if current_user.rol_id in [1,2,3,4] %}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Consulta <span class="caret"></span></a>
+            <!--button id="menu_consulta" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Consulta <span class="caret"></span></button-->
+            <ul class="dropdown-menu" role="menu" aria-labelledby="menu_consulta">
+              <li><a href="/localizacion">Localización</a></li>
+              <li><a href="#">Información general</a></li>
+              <!--li class="divider"></li>
+              <li><a href="#">Documento diagnóstico</a></li-->
+            </ul>
+          </li>
+          {% endif %}
+
+          <!-- menú diagnóstico -->
+          {% if current_user.rol_id in [1,3] %}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Diagnóstico<span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="/resultados_muestreos">Resultados de los muestreos</a></li>             
+              <li><a href="/datos_personal">Listado del personal</a></li>
+              <li><a href="/diagnostico?seccion=0&titulo_seccion=Portada">Documento diagnóstico</a></li>
+              <li><a href="#">Reportes</a></li>
+            </ul>
+          </li>
+          {% endif %}
+
+          <!-- menú captura -->
+          {% if current_user.rol_id in [1,3,4] %}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Captura <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="#">Plantas</a></li>             
+              <li><a href="/info_plantas">Información recopilada</a></li>             
+            </ul>
+          </li>          
+          {% endif %}
+          <!-- menú usuario loggeado  -->
+          
+          <li class="dropdown">
+            <a href="#" data-toggle="dropdown" class="dropdown-toggle user-action">
+              <img src="/static/img/current_user32.png" class="avatar" alt="Avatar"> 
+              {{ current_user.nombre_usuario }} 
+              <b class="caret"></b>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="#"><i class="fa fa-user-o"></i> Perfil</a></li>
+              {% if current_user.rol_id==1 %}
+              <li><a href="#"><i class="fa fa-user-o"></i> Administración</a></li>
+              {% endif %}
+              <li class="divider"></li>
+              <li><a href="/logout"><i class="material-icons">&#xE8AC;</i> Cerrar sesión</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+</nav>

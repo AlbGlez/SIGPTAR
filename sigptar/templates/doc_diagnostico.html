@@ -1,0 +1,225 @@
+{% extends './base_nav.html' %}
+
+{% block title %}
+SIGPTAR
+{% endblock %}
+{% block espec_css %}
+<style>
+    #canvas_container {
+        width: 800px;
+        height: 600px;
+        overflow: auto;
+    }
+
+    #canvas_container {
+        background: #333;
+        text-align: center;
+        border: solid 3px;
+    }
+</style>
+{% endblock %}
+{% block header %}
+<h3 style="text-align: center;" >Diagnóstico [{{ titulo_sec }}] </h3>
+{% endblock %}
+{% block body %}
+
+{% include 'select_planta.html' %}
+
+<div id="my_pdf_viewer">
+    <div id="canvas_container">
+        <canvas id="pdf_renderer"></canvas>
+    </div>
+
+    <div id="navigation_controls">
+        <button id="go_previous">Previous</button>
+        <input id="current_page" value="1" type="number" />
+        <button id="go_next">Next</button>
+    </div>
+
+    <div id="zoom_controls">
+        <button id="zoom_in">+</button>
+        <button id="zoom_out">-</button>
+    </div>
+</div>
+{% endblock %}
+{%block espec_js%}
+<script src="http://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.0.943/pdf.min.js"></script>
+<script>
+
+    const plantas = {{ lista_plantas | tojson | safe }}
+    const seccion = {{ seccion_ini|tojson|safe}}
+
+    var doc_diag_pdf="";
+    var pag_doc_diag=[]
+
+    function getDocPlanta(planta_id) {
+        console.log('Planta: ' + planta_id);
+        for (var i = 0; i < plantas.length; i++) {
+            if (parseInt(plantas[i][0]) == parseInt(planta_id)) {
+                for (var j=0;j<11;j++) { // copia la información de las páginas
+                    pag_doc_diag[j]=plantas[i][j+3]
+                }
+                return "/static/pdf/"+plantas[i][2];
+            }
+        }
+        return null;
+    }
+
+    function getSectionPage(section){
+        if (section>=1 && section<=11)
+            return pag_doc_diag[section-1]
+        else
+            return 1;
+    }
+
+    // asigna el eveto de cambio de planta
+    function select_planta_change(e) {
+        id_planta_actual = document.getElementById("select_planta").value;
+        sessionStorage.setItem('planta_actual', id_planta_actual);
+        doc_diag_pdf=getDocPlanta(id_planta_actual);        
+        console.log("Doc: "+doc_diag_pdf);
+        if (seccion!=null) {
+            console.log("Sección: "+seccion);
+            myState.currentPage=getSectionPage(seccion);            
+        } else
+            console.log("No hay seccion");
+        loadDocPDf(doc_diag_pdf);
+    }
+
+    $('#select_planta').on('change', select_planta_change);
+
+    var myState = {
+        pdf: null,
+        currentPage: 1,
+        zoom: 1,
+        scale: 1
+    }
+
+    
+    function loadDocPDf(docPDF) {
+        pdfjsLib.getDocument(docPDF).then((pdf) => {
+            myState.pdf = pdf;
+            render();
+        });
+    }
+
+    function render() {
+        myState.pdf.getPage(myState.currentPage).then((page) => {
+
+            var canvas = document.getElementById("pdf_renderer");
+            var ctx = canvas.getContext('2d');
+
+            var viewport = page.getViewport(myState.zoom);
+
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            page.render({
+                canvasContext: ctx,
+                viewport: viewport
+            });
+        });
+    }
+
+
+/*    
+
+    //https://stackoverflow.com/questions/16480469/how-to-display-whole-pdf-not-only-one-page-with-pdf-js
+
+    var canvas_pages=[];
+
+    
+    function loadDocPDf(docPDF) {
+        var viewer = document.getElementById("pdf_renderer");
+        canvas_pages=[];
+        pdfjsLib.getDocument(docPDF).then((pdf) => {
+            myState.pdf = pdf;
+            for(page = 1; page <= pdf.numPages; page++) {
+                canvas = document.createElement("canvas");
+                canvas.className = 'pdf-page-canvas';         
+                viewer.appendChild(canvas);
+                renderPage(page, canvas);
+                canvas_pages.push(canvas);
+            }
+            myState.currentPage=1;
+            myState.zoom = 100;
+           //render();
+        });
+    }
+
+    function render() {
+        myState.pdf.getPage(myState.currentPage).then((page) => {            
+            var canvas = canvas_pages[myState.currentPage-1];
+            var ctx = canvas.getContext('2d');
+            var viewport = page.getViewport(myState.zoom);
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+            page.render({
+                canvasContext: ctx,
+                viewport: viewport
+            });
+        });
+    }
+
+*/
+    document.getElementById('go_previous').addEventListener('click', (e) => {
+        if (myState.pdf == null || myState.currentPage == 1)
+            return;
+        myState.currentPage -= 1;
+        document.getElementById("current_page").value = myState.currentPage;
+        render();
+    });
+
+    document.getElementById('go_next').addEventListener('click', (e) => {
+        if (myState.pdf == null || myState.currentPage > myState.pdf._pdfInfo.numPages)
+            return;
+        myState.currentPage += 1;
+        document.getElementById("current_page").value = myState.currentPage;
+        render();
+    });
+
+    document.getElementById('current_page').addEventListener('keypress', (e) => {
+        if (myState.pdf == null) return;
+
+        // Get key code
+        var code = (e.keyCode ? e.keyCode : e.which);
+
+        // If key code matches that of the Enter key
+        if (code == 13) {
+            var desiredPage =
+                document.getElementById('current_page').valueAsNumber;
+
+            if (desiredPage >= 1 && desiredPage <= myState.pdf._pdfInfo.numPages) {
+                myState.currentPage = desiredPage;
+                document.getElementById("current_page").value = desiredPage;
+                render();
+            }
+        }
+    });
+
+    document.getElementById('zoom_in').addEventListener('click', (e) => {
+        if (myState.pdf == null) return;
+        myState.zoom += 0.5;
+        render();
+    });
+
+    document.getElementById('zoom_out').addEventListener('click', (e) => {
+        if (myState.pdf == null) return;
+        myState.zoom -= 0.5;
+        render();
+    });
+
+    function triggerChange(element) {
+        let changeEvent = new Event('change');
+        element.dispatchEvent(changeEvent);
+    }
+
+
+    $(document).ready(function () {
+        triggerChange(document.getElementById("select_planta"));
+    });
+
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends './base_nav.html' %}
+
+{% block title %}
+SIGPTAR
+{% endblock %}
+{% block espec_css %}
+
+<!--link rel="stylesheet" href="https://cdn.datatables.net/1.12.1/css/dataTables.bootstrap.min.css" /-->
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs/dt-1.13.1/datatables.min.css"/>
+ 
+<style type="text/css">
+    div.dataTables_info {
+        position: absolute
+    }
+
+    div.dataTables_wrapper div.dataTables_paginate {
+        float: right;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        text-align: right;
+        white-space: nowrap;
+    }
+</style>
+
+{%endblock%}
+{% block header %}
+<h3 style="text-align: center;" >Lista de información de la PTAR</h3>
+{% endblock %}
+{% block body %}
+
+{% include 'select_planta.html' %}
+
+<table id="tabla_info_planta" class="table table-fit table-striped table-bordered table-sm" style="width:100%">
+    <thead >
+        <tr>
+            <th>Núm.</th>
+            <th>Información</th>
+            <th>Entregada</th>
+            <th>Archivos digitales (cantidad)</th>
+            <th>Tamaño (MB)</th>
+            <th>Físico</th>
+            <th>Fecha de recepción</th>
+            <th>Observaciones</th>
+            <th>Editar</th>
+        </tr>
+    </thead>
+</table>
+
+{% endblock %}
+
+{%block espec_js%}
+
+<script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.13.1/datatables.min.js"></script>
+
+<!--
+<script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/buttons/1.5.1/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/select/1.2.5/js/dataTables.select.min.js"></script>
+<script type="text/javascript" charset="utf8"
+    src="https://editor.datatables.net/extensions/Editor/js/dataTables.editor.min.js"></script>
+-->
+
+<script>
+
+    // asigna el evento de cambio de planta
+    function select_planta_change(e) {
+        id_planta_actual = document.getElementById("select_planta").value;
+        sessionStorage.setItem('planta_actual', id_planta_actual);
+        consulta_info_planta(id_planta_actual);
+    }
+
+    $('#select_planta').on('change', select_planta_change);
+
+    function consulta_info_planta(idPlanta) {
+        if ($.fn.dataTable.isDataTable('#tabla_info_planta')) {
+            table = $('#tabla_info_planta').DataTable();
+            table.destroy();
+        }
+        table = $('#tabla_info_planta').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.13.1/i18n/es-MX.json"
+            },
+            "dom": 'lfrtp', //
+            "processing": true,
+            "ajax": { "url": "/consulta_info_planta?planta=" + idPlanta, "dataSrc": "" },
+            // add column definitions to map your json to the table                                           
+            "columns": [
+                { data: "tipo_documento_id"},
+                { data: "documento" },
+                { data: "entregado" , render:  function (data, type, row) {
+                    switch (data) {
+                        case 1:
+                            return '<input type="checkbox" checked readonly>'
+                            break;
+                        case 0:
+                            return '<input type="checkbox" readonly>'
+                            break;
+                    } } },
+                { data: "cant_arch_digitales" },
+                { data: "tam_arch_digitales" },
+                { data: "tam_fisico" },
+                { data: "fecha_recepcion" },
+                { data: "observaciones" }
+            ],
+            columnDefs: [{targets: 8, data: null, defaultContent: '<button>Modificar</button>'},
+                         {targets: [0,2,3,4,5,6], className: 'text-center' },
+                         {targets: [0,1,2,3,4,5,6,7], className: 'dt-head-center'} ]
+        });
+
+        $('#tabla_info_planta tbody').on('click', 'button', function () {
+            var data = table.row($(this).parents('tr')).data();
+            alert("Modificar documento "+ data.tipo_documento_id);
+        });
+    }
+
+    function triggerChange(element) {
+        let changeEvent = new Event('change');
+        element.dispatchEvent(changeEvent);
+    }
+
+    $(document).ready(function () {
+        triggerChange(document.getElementById("select_planta"));
+    });
+</script>
+
+{% endblock %}

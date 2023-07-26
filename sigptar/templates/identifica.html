@@ -1,0 +1,111 @@
+{% extends './base.html' %}
+
+{% block title %}
+SIGPTAR
+{% endblock %}
+
+{% block espec_css %}
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.0/css/all.css" 
+      integrity="sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt" 
+      crossorigin="anonymous">
+
+<link rel="stylesheet" href="/static/css/identifica.css">
+
+{% endblock %}
+
+{% block header %}
+
+<h2 style='text-align: center'>SIGPTAR</h2>
+
+ <!-- Required meta tags -->
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+ <h4 class="fw-bold mb-2" style="text-align: center">Autenticación de usuario</h4>
+ 
+{% endblock %}
+
+{% block body %}
+<div class="container" style="max-width: 500px">
+<form action="/login" method="post">  
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <br />
+    {% for message in messages %}
+    <div class="alert alert-danger alert-dismissible fade in">
+        <!--a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a-->
+        <strong> {{ message }} </strong>
+        <!--button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="close"></button-->
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+    </div>            
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <table class="table table-striped table-hover" >
+        <tr>
+            <td style="text-align: center; align: center">
+        <div class="container d-flex justify-content-center align-items-center h-100" style="max-width:400px">
+    <!--div class="container mt-5" style="max-width:400px"-->
+        <div class="form-group ">
+            <label for="inputUsr">Usuario:</label>
+            <div class="input-group center-block "> 
+                <input type="text" maxlength="20" class="form-control" id="inputUsr" name="usuario" aria-describedby="emailHelp" placeholder="Nombre del usuario" style="width: 220px;">
+                <!--small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small-->
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="user_password">Contraseña:</label>
+            <div class="input-group center-block">
+                <input type="password" name="password" id="password" class="form-control" data-toggle="password" placeholder="Contraseña" style="width: 200px;" >
+                <i id="eyeBtn" class="fa fa-eye input-group-text"></i>
+            </div>
+        </div>
+    </div>
+</td>
+</tr>
+<tr class='center-block'>
+    <td style='vertical-align:middle'>
+        <input type="checkbox" value="unchecked"  name="checkAsAnonimo" id="checkAsAnonimo"  class="larger" >
+    </td>
+    <td style='text-align: left;  padding-left: 0px;'>
+        <label for="checkAsAnonimo">Entrar como anónimo  </label>       
+    </td>
+</tr>
+<tr>
+    <td class="center-block">
+        <button type="submit" class="btn btn-primary">Acceder</button>   
+    </td>
+</tr>
+</table>
+<input type="hidden" id="formId" name="formId" value="123" />
+</form>
+</div>
+
+<p>
+
+<script type="text/javascript">
+
+    document.getElementById('checkAsAnonimo').onchange = function() {
+        document.getElementById('inputUsr').setAttribute("text","");
+        document.getElementById('password').setAttribute("text","");        
+        document.getElementById('inputUsr').disabled = this.checked;
+        document.getElementById('password').disabled = this.checked;
+    };
+
+</script>
+
+{% endblock %}
+
+{%block espec_js%}
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" 
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" 
+        crossorigin="anonymous">
+</script>
+<script type="text/javascript" src="/static/js/bootstrap-show-password.js"></script>
+
+{% endblock %}
